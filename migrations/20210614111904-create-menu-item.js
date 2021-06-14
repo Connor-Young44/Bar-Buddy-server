@@ -1,7 +1,7 @@
 "use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("bars", {
+    await queryInterface.createTable("menuItems", {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -9,30 +9,30 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
       name: {
+        allowNull: false,
         type: Sequelize.STRING,
-        allowNull: false,
       },
-      location: {
-        type: Sequelize.STRING,
+      isFood: {
         allowNull: false,
-      },
-      desc: {
-        type: Sequelize.TEXT,
-        allowNull: false,
+        type: Sequelize.BOOLEAN,
       },
       imageUrl: {
+        allowNull: false,
         type: Sequelize.STRING,
-        allowNull: false,
       },
-      numberOfTables: {
-        type: Sequelize.INTEGER,
+      desc: {
         allowNull: false,
+        type: Sequelize.TEXT,
       },
-      userId: {
-        type: Sequelize.INTEGER,
+      price: {
         allowNull: false,
+        type: Sequelize.INTEGER,
+      },
+      barId: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
         references: {
-          model: "users",
+          model: "bars",
           key: "id",
         },
         onUpdate: "CASCADE",
@@ -49,6 +49,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("bars");
+    await queryInterface.dropTable("menuItems");
   },
 };
