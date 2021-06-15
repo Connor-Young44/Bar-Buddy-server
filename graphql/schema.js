@@ -53,6 +53,10 @@ const typeDefs = gql`
     order: [Order]
     menuItem: [MenuItem]
   }
+  type Login {
+    token: String!
+    user: User
+  }
 
   type Query {
     users: [User]
@@ -60,6 +64,16 @@ const typeDefs = gql`
     orders: [Order]
     tables: [Table]
     menuItems: [MenuItem]
+  }
+  type Mutation {
+    login(email: String!, password: String!): Login!
+    signup(
+      firstName: String!
+      lastName: String!
+      email: String!
+      password: String!
+      isBuisness: Boolean!
+    ): User!
   }
 `;
 
