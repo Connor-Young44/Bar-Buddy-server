@@ -11,6 +11,7 @@ const typeDefs = gql`
     isBuisness: Boolean!
     currentBar: Int
   }
+
   type Bar {
     id: ID!
     name: String!
@@ -18,7 +19,7 @@ const typeDefs = gql`
     desc: String!
     imageUrl: String!
     numberOfTables: Int!
-    user: User
+    userId: Int
     tables: [Table]
   }
   type Table {
@@ -60,6 +61,7 @@ const typeDefs = gql`
 
   type Query {
     users: [User]
+    me: User
     bars: [Bar]
     orders: [Order]
     tables: [Table]
@@ -74,6 +76,14 @@ const typeDefs = gql`
       password: String!
       isBuisness: Boolean!
     ): User!
+    createBar(
+      name: String!
+      location: String!
+      desc: String!
+      imageUrl: String!
+      numberOfTables: Int!
+      userId: Int!
+    ): Bar!
   }
 `;
 

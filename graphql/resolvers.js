@@ -11,7 +11,16 @@ module.exports = {
       return db.user.findAll();
     },
     //one user
-    //singleUser: async (parent, _args, { db }, info) => {},
+    me: async (parent, _args, { User, db }, info) => {
+      //console.log("me query called");
+      //console.log(User.userId);
+      //console.log(User);
+      if (User === null) {
+        return;
+      }
+      //console.log(User);
+      return db.user.findOne({ where: User.userId });
+    },
     bars: async (parent, _args, { db }, info) => {
       return db.bar.findAll({ include: [db.user, db.table] });
     },
@@ -26,6 +35,7 @@ module.exports = {
       return db.menuItem.findAll({ include: [db.bar] });
     },
   },
+  //****MUTATIONS */
   Mutation: {
     login: async (parent, { email, password }, { db }, info) => {
       const user = await db.user.findOne({
@@ -36,10 +46,13 @@ module.exports = {
       const matchingPassword = bcrypt.compareSync(password, user.password);
 
       if (!matchingPassword) return new ApolloError("incorect Password", 400);
+      //console.log(user.dataValues.id);
 
-      const token = toJwt({ userId: user.id });
-      return { token, user };
+      const token = toJwt({ userId: user.dataValues.id });
+
+      return { token };
     },
+    //SIGN UP
     signup: async (
       parent,
       { firstName, lastName, email, password, isBuisness },
@@ -67,6 +80,44 @@ module.exports = {
 
       delete newUser["password"];
       return newUser;
+    },
+    //NEW BAR
+    createBar: async (
+      parent,
+      { name, location, desc, imageUrl, numberOfTables, userId },
+      { db },
+      info
+    ) => {
+      //validate inputs
+      if (!name) return new ApolloError("Your Bar Needs a Name!", 400);
+      if (!location) return new ApolloError("Please Provide Address", 400);
+      if (!desc)
+        return new ApolloError(
+          "Please Provide a Short Description of Your Bar!",
+          400
+        );
+      if (!imageUrl)
+        return new ApolloError("Please an image url of your bar!", 400);
+      if (!numberOfTables)
+        return new ApolloError("Please Provide a Number of Tables", 400);
+      if (!userId)
+        return new ApolloError(
+          "you must be logged in to create a new bar",
+          400
+        );
+
+      //if all inputs are valid create new user
+
+      const newBar = await db.bar.create({
+        name,
+        location,
+        desc,
+        imageUrl,
+        numberOfTables,
+        userId,
+      });
+
+      return newBar;
     },
   },
 };

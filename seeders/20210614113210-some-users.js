@@ -30,7 +30,7 @@ module.exports = {
         {
           firstName: "Floki",
           lastName: "Young",
-          email: "connor@young.com",
+          email: "floki@young.com",
           password: bcrypt.hashSync("test", saltRounds),
           isBuisness: true,
           currentBar: null,
