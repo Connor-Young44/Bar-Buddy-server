@@ -37,7 +37,7 @@ const typeDefs = gql`
     closed: Boolean!
     qty: Int
     user: User
-    table: Table
+    tableId: Int
     menuItems: [MenuItem]
   }
   type MenuItem {
@@ -47,6 +47,7 @@ const typeDefs = gql`
     imageUrl: String!
     desc: String!
     price: Int!
+    barId: Int!
     bar: [Bar]
   }
   type Menu_Order {
@@ -85,7 +86,7 @@ const typeDefs = gql`
       userId: Int!
     ): Bar!
     editBar(
-      id: ID
+      id: Int!
       name: String
       location: String
       desc: String
@@ -93,6 +94,14 @@ const typeDefs = gql`
       numberOfTables: Int
       userId: Int
     ): Bar
+    addMenuItem(
+      name: String!
+      isFood: Boolean!
+      imageUrl: String!
+      desc: String!
+      price: Int!
+      barId: Int!
+    ): MenuItem!
   }
 `;
 

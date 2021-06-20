@@ -12,13 +12,10 @@ module.exports = {
     },
     //one user
     me: async (parent, _args, { User, db }, info) => {
-      //console.log("me query called");
-      //console.log(User.userId);
-      //console.log(User);
       if (User === null) {
         return;
       }
-      //console.log(User);
+
       return db.user.findOne({ where: User.userId });
     },
     bars: async (parent, _args, { db }, info) => {
@@ -158,6 +155,38 @@ module.exports = {
       );
       // console.log(bar);
       return bar;
+    },
+    addMenuItem: async (
+      parent,
+      { name, isFood, desc, imageUrl, price, barId },
+      { db },
+      info
+    ) => {
+      //validate inputs
+      if (!name) return new ApolloError("Your Menu Item Needs a Name!", 400);
+
+      if (!desc)
+        return new ApolloError(
+          "Please Provide a Short Description of Your item!",
+          400
+        );
+      if (!imageUrl)
+        return new ApolloError("Please an image url of your item!", 400);
+      if (!price) return new ApolloError("Please Provide a Price", 400);
+      if (!barId) return new ApolloError("Not Assoisiated to a bar ", 400);
+
+      //if all inputs are valid create new item
+
+      const newItem = await db.menuItem.create({
+        name,
+        isFood,
+        desc,
+        imageUrl,
+        price,
+        barId,
+      });
+
+      return newItem;
     },
   },
 };
