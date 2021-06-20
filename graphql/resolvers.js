@@ -39,7 +39,7 @@ module.exports = {
   Mutation: {
     login: async (parent, { email, password }, { db }, info) => {
       const user = await db.user.findOne({
-        where: { email },
+        where: { email: email },
       });
 
       if (!user) return new ApolloError("User with that email not found", 404);
@@ -118,6 +118,46 @@ module.exports = {
       });
 
       return newBar;
+    },
+    editBar: async (
+      parent,
+      { id, name, location, desc, imageUrl, numberOfTables, userId },
+      { db },
+      info
+    ) => {
+      //console.log(location);
+      const bar = await db.bar.findOne({ where: { id: id } });
+      if (!bar) return new ApolloError("bar not found", 400);
+      if (name !== undefined) {
+        bar.name = name;
+      }
+      if (location !== undefined) {
+        bar.location = location;
+      }
+      if (desc !== undefined) {
+        bar.desc = desc;
+      }
+      if (imageUrl !== undefined) {
+        bar.imageUrl = imageUrl;
+      }
+      if (numberOfTables !== undefined) {
+        bar.numberOfTables = numberOfTables;
+      }
+
+      updatedBar = await db.bar.update(
+        {
+          id,
+          name: bar.name,
+          location: bar.location,
+          desc: bar.desc,
+          imageUrl: bar.imageUrl,
+          numberOfTables: bar.numberOfTables,
+          userId,
+        },
+        { where: { id: id } }
+      );
+      // console.log(bar);
+      return bar;
     },
   },
 };

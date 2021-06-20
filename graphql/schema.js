@@ -84,6 +84,15 @@ const typeDefs = gql`
       numberOfTables: Int!
       userId: Int!
     ): Bar!
+    editBar(
+      id: ID
+      name: String
+      location: String
+      desc: String
+      imageUrl: String
+      numberOfTables: Int
+      userId: Int
+    ): Bar
   }
 `;
 
