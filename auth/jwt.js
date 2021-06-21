@@ -3,7 +3,7 @@ require("dotenv").config();
 const jwtSecret = process.env.jwtSecret;
 
 function toJwt(data) {
-  return jwt.sign(data, jwtSecret, { expiresIn: "2h" });
+  return jwt.sign(data, jwtSecret, { expiresIn: "10h" });
 }
 
 function toData(token) {

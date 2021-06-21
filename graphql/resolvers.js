@@ -2,17 +2,19 @@ const { ApolloError } = require("apollo-server-express");
 const bcrypt = require("bcrypt");
 const { toJwt } = require("../auth/jwt");
 const { saltRounds } = require("../config/constants");
+const pubsub = require("../pubSub");
 
 //db => models from sequelize
+
 module.exports = {
   Query: {
     //all users
-    users: async (parent, _args, { db }, info) => {
-      return db.user.findAll();
+    users: async (parent, { barId }, { db }, info) => {
+      return db.user.findAll({ where: { currentBar: barId } });
     },
     //one user
     me: async (parent, _args, { User, db }, info) => {
-      if (User === null) {
+      if (User === undefined) {
         return;
       }
 
@@ -22,14 +24,20 @@ module.exports = {
       return db.bar.findAll({ include: [db.user, db.table] });
     },
 
-    tables: async (parent, _args, { db }, info) => {
-      return db.table.findAll({ include: [db.bar, db.order] });
+    tables: async (parent, { barId }, { db }, info) => {
+      return db.table.findAll({
+        where: { barId: barId },
+        include: [db.order],
+      });
     },
-    orders: async (parent, _args, { db }, info) => {
-      return db.order.findAll({ include: [db.table, db.user, db.menuItem] });
+    orders: async (parent, { tableId }, { db }, info) => {
+      return db.order.findAll({
+        where: { tableId: tableId },
+        include: [db.table, db.user, db.menuItem],
+      });
     },
     menuItems: async (parent, _args, { db }, info) => {
-      return db.menuItem.findAll({ include: [db.bar] });
+      return db.menuItem.findAll();
     },
   },
   //****MUTATIONS */
@@ -44,10 +52,10 @@ module.exports = {
 
       if (!matchingPassword) return new ApolloError("incorect Password", 400);
       //console.log(user.dataValues.id);
-
+      //console.log(user);
       const token = toJwt({ userId: user.dataValues.id });
 
-      return { token };
+      return { token, user };
     },
     //SIGN UP
     signup: async (
@@ -103,7 +111,7 @@ module.exports = {
           400
         );
 
-      //if all inputs are valid create new user
+      //if all inputs are valid create new bar
 
       const newBar = await db.bar.create({
         name,
@@ -156,6 +164,52 @@ module.exports = {
       // console.log(bar);
       return bar;
     },
+    editUser: async (
+      parent,
+      { id, firstName, lastName, email, password, currentBar, isBuisness },
+      { db },
+
+      info
+    ) => {
+      const user = await db.user.findOne({ where: { id: id } });
+      //console.log(user);
+      if (!user) return new ApolloError("user not found", 400);
+      if (firstName !== undefined) {
+        user.firstName = firstName;
+      }
+      if (lastName !== undefined) {
+        user.lastName = lastName;
+      }
+      if (email !== undefined) {
+        user.email = email;
+      }
+      if (password !== undefined) {
+        user.password = password;
+      }
+      if (currentBar !== undefined) {
+        user.currentBar = currentBar;
+      }
+      if (isBuisness !== undefined) {
+        user.isBuisness = isBuisness;
+      }
+      updatedUser = await db.user
+        .update(
+          {
+            id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            password: user.password,
+            currentBar: user.currentBar,
+            isBuisness: user.isBuisness,
+          },
+          { where: { id: id } }
+        )
+        .then(pubsub.publish("USER JOINED", user));
+      // console.log(user);
+      return user;
+    },
+
     addMenuItem: async (
       parent,
       { name, isFood, desc, imageUrl, price, barId },
@@ -187,6 +241,11 @@ module.exports = {
       });
 
       return newItem;
+    },
+  },
+  Subscription: {
+    userJoined: {
+      subscribe: () => pubsub.asyncIterator(["USER JOINED"]),
     },
   },
 };

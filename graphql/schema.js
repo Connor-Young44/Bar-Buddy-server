@@ -48,12 +48,12 @@ const typeDefs = gql`
     desc: String!
     price: Int!
     barId: Int!
-    bar: [Bar]
+    order: [Order]
   }
   type Menu_Order {
     id: ID!
     order: [Order]
-    menuItem: [MenuItem]
+    menuItem: MenuItem
   }
   type Login {
     token: String!
@@ -61,11 +61,11 @@ const typeDefs = gql`
   }
 
   type Query {
-    users: [User]
+    users(barId: Int): [User]
     me: User
     bars: [Bar]
-    orders: [Order]
-    tables: [Table]
+    orders(tableId: Int!): [Order]
+    tables(barId: Int!): [Table]
     menuItems: [MenuItem]
   }
   type Mutation {
@@ -102,6 +102,18 @@ const typeDefs = gql`
       price: Int!
       barId: Int!
     ): MenuItem!
+    editUser(
+      id: Int!
+      firstName: String
+      lastName: String
+      email: String
+      password: String
+      currentBar: Int
+      isBuisness: Boolean
+    ): User
+  }
+  type Subscription {
+    userJoined: User!
   }
 `;
 
