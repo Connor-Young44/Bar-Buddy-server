@@ -30,14 +30,15 @@ module.exports = {
         include: [db.order],
       });
     },
-    orders: async (parent, { tableId }, { db }, info) => {
+    orders: async (parent, __args, { db }, info) => {
       return db.order.findAll({
-        where: { tableId: tableId },
         include: [db.table, db.user, db.menuItem],
       });
     },
-    menuItems: async (parent, _args, { db }, info) => {
-      return db.menuItem.findAll();
+    menuItems: async (parent, { barId }, { db }, info) => {
+      return db.menuItem.findAll({
+        where: { barId: barId },
+      });
     },
   },
   //****MUTATIONS */
@@ -192,20 +193,19 @@ module.exports = {
       if (isBuisness !== undefined) {
         user.isBuisness = isBuisness;
       }
-      updatedUser = await db.user
-        .update(
-          {
-            id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            password: user.password,
-            currentBar: user.currentBar,
-            isBuisness: user.isBuisness,
-          },
-          { where: { id: id } }
-        )
-        .then(pubsub.publish("USER JOINED", user));
+      pubsub.publish("USER JOINED", { userJoined: user });
+      updatedUser = await db.user.update(
+        {
+          id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          password: user.password,
+          currentBar: user.currentBar,
+          isBuisness: user.isBuisness,
+        },
+        { where: { id: id } }
+      );
       // console.log(user);
       return user;
     },
@@ -242,10 +242,73 @@ module.exports = {
 
       return newItem;
     },
+    placeOrder: async (
+      parent,
+      { served, closed, qty, userId, tableId, menuItemId },
+      { db },
+      info
+    ) => {
+      const newOrder = await db.order.create({
+        served,
+        closed,
+        qty,
+        userId,
+        tableId,
+      });
+      //console.log(newOrder.dataValues.id);
+      const newMenuOrder = await db.menu_order.create({
+        orderId: newOrder.dataValues.id,
+        menuItemId,
+      });
+      pubsub.publish("ORDER PLACED", { orderPlaced: newOrder });
+      //console.log(newOrder);
+      return { order: newOrder, menu_order: newMenuOrder };
+    },
+    editTable: async (
+      parent,
+      { id, number, seats, occupiedBy, isFree, barId },
+      { db },
+      info
+    ) => {
+      const table = await db.table.findOne({ where: { id: id } });
+
+      if (!table) return new ApolloError("table not found", 400);
+      if (number !== undefined) {
+        table.number = number;
+      }
+      if (seats !== undefined) {
+        table.seats = seats;
+      }
+      if (occupiedBy !== undefined) {
+        table.occupiedBy = occupiedBy;
+      }
+      if (isFree !== undefined) {
+        table.isFree = isFree;
+      }
+      if (barId !== undefined) {
+        table.barId = barId;
+      }
+      updatedTable = await db.table.update(
+        {
+          id,
+          number: table.number,
+          seats: table.seats,
+          occupiedBy: table.occupiedBy,
+          isFree: table.isFree,
+          barId: table.barId,
+        },
+        { where: { id: id } }
+      );
+
+      return table;
+    },
   },
   Subscription: {
     userJoined: {
       subscribe: () => pubsub.asyncIterator(["USER JOINED"]),
+    },
+    orderPlaced: {
+      subscribe: () => pubsub.asyncIterator(["ORDER PLACED"]),
     },
   },
 };

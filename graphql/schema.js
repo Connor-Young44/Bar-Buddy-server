@@ -33,8 +33,8 @@ const typeDefs = gql`
   }
   type Order {
     id: ID!
-    served: Boolean!
-    closed: Boolean!
+    served: Boolean
+    closed: Boolean
     qty: Int
     user: User
     tableId: Int
@@ -43,7 +43,7 @@ const typeDefs = gql`
   type MenuItem {
     id: ID!
     name: String
-    isFood: Boolean!
+    isFood: Boolean
     imageUrl: String!
     desc: String!
     price: Int!
@@ -51,7 +51,7 @@ const typeDefs = gql`
     order: [Order]
   }
   type Menu_Order {
-    id: ID!
+    id: ID
     order: [Order]
     menuItem: MenuItem
   }
@@ -59,14 +59,18 @@ const typeDefs = gql`
     token: String!
     user: User
   }
+  type PlaceOrder {
+    order: Order
+    menu_order: Menu_Order
+  }
 
   type Query {
     users(barId: Int): [User]
     me: User
     bars: [Bar]
-    orders(tableId: Int!): [Order]
+    orders: [Order]
     tables(barId: Int!): [Table]
-    menuItems: [MenuItem]
+    menuItems(barId: Int!): [MenuItem]
   }
   type Mutation {
     login(email: String!, password: String!): Login!
@@ -111,9 +115,26 @@ const typeDefs = gql`
       currentBar: Int
       isBuisness: Boolean
     ): User
+    placeOrder(
+      served: Boolean
+      closed: Boolean
+      qty: Int!
+      userId: Int!
+      tableId: Int!
+      menuItemId: Int!
+    ): PlaceOrder!
+    editTable(
+      id: Int!
+      number: Int
+      seats: Int
+      occupiedBy: Int
+      isFree: Boolean
+      barId: Int
+    ): Table
   }
   type Subscription {
-    userJoined: User!
+    userJoined: User
+    orderPlaced: Order
   }
 `;
 
