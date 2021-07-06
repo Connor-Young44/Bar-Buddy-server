@@ -11,21 +11,9 @@ const { typeDefs } = require("./graphql/schema");
 const resolvers = require("./graphql/resolvers");
 const db = require("./models");
 const jwt = require("jsonwebtoken");
+const cors = require("cors");
 
-const jwtSecret = process.env.jwtSecret;
-// get the user info from a JWT
-// const getUser = (token) => {
-//   try {
-//     if (token) {
-//       return jwt.verify(token, jwtSecret);
-//     } else {
-//       return null;
-//     }
-//   } catch (error) {
-//     return "getUser backend error";
-//   }
-// };
-
+app.use(cors());
 //new apollo server
 const server = new ApolloServer({
   typeDefs, //schema

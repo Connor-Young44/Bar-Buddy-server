@@ -264,6 +264,40 @@ module.exports = {
       //console.log(newOrder);
       return { order: newOrder, menu_order: newMenuOrder };
     },
+    //edit order for served / closed
+    editOrder: async (parent, { id, served, closed, qty, userId, tableId }, { db }, info) => {
+      const order = await db.order.findOne({ where: { id: id } });
+
+      if (!order) return new ApolloError("order not found", 400);
+      if (served !== undefined) {
+        order.served = served;
+      }
+      if (closed !== undefined) {
+        order.closed = closed;
+      }
+      if (qty !== undefined) {
+        order.qty = qty;
+      }
+      if (userId !== undefined) {
+        order.userId = userId;
+      }
+      if (tableId !== undefined) {
+        order.tableId = tableId;
+      }
+      updatedOrder = await db.order.update(
+        {
+          id,
+          served: order.served,
+          closed: order.closed,
+          qty: order.qty,
+          userId: order.userId,
+          tableId: order.tableId,
+        },
+        { where: { id: id } }
+      );
+
+      return updatedOrder;
+    },
     editTable: async (
       parent,
       { id, number, seats, occupiedBy, isFree, barId },

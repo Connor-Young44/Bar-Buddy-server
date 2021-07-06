@@ -123,6 +123,14 @@ const typeDefs = gql`
       tableId: Int!
       menuItemId: Int!
     ): PlaceOrder!
+    editOrder(
+      id: Int!
+      served: Boolean
+      closed: Boolean
+      qty: Int
+      userId: Int
+      tableId: Int
+    ): Order
     editTable(
       id: Int!
       number: Int
