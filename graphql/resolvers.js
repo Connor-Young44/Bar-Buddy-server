@@ -265,7 +265,12 @@ module.exports = {
       return { order: newOrder, menu_order: newMenuOrder };
     },
     //edit order for served / closed
-    editOrder: async (parent, { id, served, closed, qty, userId, tableId }, { db }, info) => {
+    editOrder: async (
+      parent,
+      { id, served, closed, qty, userId, tableId },
+      { db },
+      info
+    ) => {
       const order = await db.order.findOne({ where: { id: id } });
 
       if (!order) return new ApolloError("order not found", 400);
@@ -297,6 +302,34 @@ module.exports = {
       );
 
       return updatedOrder;
+    },
+    createTable: async (
+      parent,
+      { number, seats, occupiedBy, isFree, barId },
+      { db },
+      info
+    ) => {
+      //validate inputs
+      if (!number) return new ApolloError("Your Table Needs a Number!", 400);
+      if (!seats)
+        return new ApolloError("Please Provide a number of seats", 400);
+      if (!barId) return new ApolloError("Not Assoisiated to a bar ", 400);
+
+      const tables = await db.table.findAll({ where: { barId } });
+      const tableExists = tables.filter((e) => e.number === number);
+      //console.log(tableExists);
+      if (tableExists.length > 0)
+        return new ApolloError("Only 1 table can be asigned that table number");
+
+      //if all inputs are valid create new table
+      const newTable = await db.table.create({
+        number,
+        seats,
+        occupiedBy,
+        isFree,
+        barId,
+      });
+      return newTable;
     },
     editTable: async (
       parent,

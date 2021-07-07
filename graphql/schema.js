@@ -115,6 +115,13 @@ const typeDefs = gql`
       currentBar: Int
       isBuisness: Boolean
     ): User
+    createTable(
+      number: Int!
+      seats: Int!
+      occupiedBy: Int
+      isFree: Boolean
+      barId: Int!
+    ): Table!
     placeOrder(
       served: Boolean
       closed: Boolean
